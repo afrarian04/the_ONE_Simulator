@@ -42,7 +42,7 @@ public class EpidemicWithCommunityRouter implements RoutingDecisionEngine, NodeR
     private Map<String, Integer> nodeRank;
     private int[] nodeSelfish;
     private List<String> msgId;
-    private List<Integer> nodeList;
+    private LinkedList<Integer> nodeList;
 
     public EpidemicWithCommunityRouter(Settings s) {
         eeFilePath = s.valueFillString(s.getSetting(PATH_SETTING));
@@ -65,6 +65,31 @@ public class EpidemicWithCommunityRouter implements RoutingDecisionEngine, NodeR
         readSelfishnes();
         readExternalCommunity();
 
+    }
+
+    private void readSelfishnes() {
+        nodeList = new LinkedList<>();
+        if (numOfRnd == 0) {
+            for (int i = 0; i < nodeSelfish.length; i++) {
+                if (!nodeList.contains(nodeSelfish[i])) {
+                    nodeList.add(nodeSelfish[i]);
+                } else {
+                    return;
+                }
+            }
+//            System.out.println("static"+nodeList);
+        } else {
+            //error while calling method 
+            Random rnd = new Random();
+            for (int i = 0; i < 5; i++) {
+                if (nodeList.size() != 5) {
+                    nodeList.add(rnd.nextInt(97));
+                } else {
+                    return;
+                }
+            }
+//            System.out.println("random"+nodeList);
+        }
     }
 
     private void readExternalCommunity() {
@@ -119,7 +144,7 @@ public class EpidemicWithCommunityRouter implements RoutingDecisionEngine, NodeR
 
     @Override
     public boolean shouldSaveReceivedMessage(Message m, DTNHost thisHost) {
-        this.analysMsgOnBuffer(thisHost);
+
         if (nodeList.contains(thisHost.getAddress())) {
             for (LinkedList<String> community : communityGlobal) {
                 if (community.contains(thisHost.toString()) && community.contains(m.getTo().toString())) {
@@ -127,6 +152,7 @@ public class EpidemicWithCommunityRouter implements RoutingDecisionEngine, NodeR
                 }
             }
         } else {
+            this.analysMsgOnBuffer(thisHost);
             return !thisHost.getRouter().hasMessage(m.getId());
         }
         return false;
@@ -134,16 +160,17 @@ public class EpidemicWithCommunityRouter implements RoutingDecisionEngine, NodeR
 
     @Override
     public boolean shouldSendMessageToHost(Message m, DTNHost otherHost, DTNHost thisHost) {
-        if (nodeList.contains(thisHost.getAddress())) {
-            for (LinkedList<String> community : communityGlobal) {
-                if (community.contains(thisHost.toString()) && community.contains(otherHost.toString())) {
-                    return true;
-                }
-            }
-        } else {
-            return true;
-        }
-        return false;
+//        if (nodeList.contains(thisHost.getAddress())) {
+//            for (LinkedList<String> community : communityGlobal) {
+//                if (community.contains(thisHost.toString()) && community.contains(otherHost.toString())) {
+//                    return true;
+//                }
+//            }
+//        } else {
+//            return true;
+//        }
+//        return false;
+        return true;
     }
 
     @Override
@@ -162,59 +189,40 @@ public class EpidemicWithCommunityRouter implements RoutingDecisionEngine, NodeR
     }
 
     private void analysMsgOnBuffer(DTNHost thisHost) {
-        Iterator msg = thisHost.getMessageCollection().iterator();
-        while (msg.hasNext()) {
-            Message m = (Message) msg.next();
+        for (Message m : thisHost.getMessageCollection()) {
             if (!msgId.contains(m.getId())) {
                 for (int i = 0; i < m.getHops().size(); i++) {
                     if (i + 1 < m.getHops().size()) {
                         DTNHost host1 = m.getHops().get(i);
                         DTNHost host2 = m.getHops().get(i + 1);
+                        boolean note = false;
                         for (LinkedList<String> community : communityGlobal) {
                             if (!community.contains(host1.toString()) && community.contains(host2.toString())) {
-                                nodeRank.put(host1.toString(), !nodeRank.containsKey(host1.toString()) ? 1 : nodeRank.get(host1.toString()) + 1);
-                                msgId.add(m.getId());
-                                break;
+//                                nodeRank.put(host1.toString(), !nodeRank.containsKey(host1.toString()) ? 1 : nodeRank.get(host1.toString()) + 1);
+                                note = true;
                             } else if (community.contains(host1.toString()) && !community.contains(host2.toString())) {
-                                nodeRank.put(host1.toString(), !nodeRank.containsKey(host1.toString()) ? 1 : nodeRank.get(host1.toString()) + 1);
-                                msgId.add(m.getId());
-                                break;
+//                                nodeRank.put(host1.toString(), !nodeRank.containsKey(host1.toString()) ? 1 : nodeRank.get(host1.toString()) + 1);
+                                note = true;
+                            } else if (!community.contains(host1.toString()) && !community.contains(host2.toString())) {
+                                note = false;
                             } else {
-                                continue;
+                                note = false;
+                                break;
                             }
+                        }
+                        if (note == true) {
+                            nodeRank.put(host1.toString(), !nodeRank.containsKey(host1.toString()) ? 1 : nodeRank.get(host1.toString()) + 1);
                         }
                     } else {
                         break;
                     }
                 }
+            } else {
+                continue;
             }
-
         }
     }
 
-    private void readSelfishnes(){
-        if (numOfRnd == 0) {
-            for (int i = 0; i < nodeSelfish.length; i++) {
-                if (!nodeList.contains(nodeSelfish[i])) {
-                    nodeList.add(nodeSelfish[i]);
-                } else {
-                    return;
-                }
-            }
-            System.out.println("static"+nodeList);
-        } else {
-            Random rnd = new Random();
-            for (int i = 0; i < 5; i++) {
-                if (nodeList.size() != 5) {
-                    nodeList.add(rnd.nextInt(97));
-                } else {
-                    return;
-                }
-            }
-            System.out.println("random"+nodeList);
-        }
-    }
-    
     @Override
     public void update(DTNHost thisHost) {
     }
@@ -223,7 +231,7 @@ public class EpidemicWithCommunityRouter implements RoutingDecisionEngine, NodeR
     public Map<String, Integer> getNodeRank() {
         return this.nodeRank;
     }
-    
+
     @Override
     public List<Integer> getNodeSelfish() {
         return this.nodeList;
