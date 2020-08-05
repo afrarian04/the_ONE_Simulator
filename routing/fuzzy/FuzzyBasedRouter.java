@@ -35,12 +35,17 @@ public class FuzzyBasedRouter implements RoutingDecisionEngine, ClosenessDecisio
     public static final String CLOSENESS = "closeness";
     public static final String VARIANCE = "variance";
     public static final String TRANSFER_OF_UTILITY = "su";
+    public static final int INTERVAL_TIME = 300;
 
     private FIS fclSimilarity;
     protected Map<DTNHost, Double> startTimestamps;
     protected Map<DTNHost, List<Duration>> connHistory;
     protected Map<DTNHost, List<Double>> closeness;
-
+    
+    private LinkedList<Double> sampelBuffer;
+    private LinkedList<Double> buffer;
+    private double lastRecord;
+    
     public FuzzyBasedRouter(Settings s) {
         String fclString = s.getSetting(FCL_SIMILARITY);
         fclSimilarity = FIS.load(fclString);
@@ -51,6 +56,9 @@ public class FuzzyBasedRouter implements RoutingDecisionEngine, ClosenessDecisio
         startTimestamps = new HashMap<DTNHost, Double>();
         connHistory = new HashMap<DTNHost, List<Duration>>();
         closeness = new HashMap<>();
+        buffer = new LinkedList<>();
+        sampelBuffer = new LinkedList<>();
+        lastRecord = Double.MIN_VALUE;
     }
 
     @Override
@@ -116,21 +124,21 @@ public class FuzzyBasedRouter implements RoutingDecisionEngine, ClosenessDecisio
         DTNHost dest = m.getTo();
         FuzzyBasedRouter de = getOtherDecisionEngine(otherHost);
 
-        double me = this.Defuzzification(dest);
-        double peer = de.Defuzzification(dest);
-//        double me = this.getNormalizedVarianceOfNodes(dest);
-//        List<Double> closenessList;
-//        if (!closeness.containsKey(otherHost)) {
-//            closenessList = new LinkedList<>();
-//        } else {
-//            closenessList = closeness.get(otherHost);
-//        }
-//        closenessList.add(me);
-//        closeness.put(otherHost, closenessList);
-//        double peer = de.getNormalizedVarianceOfNodes(dest);
-        return me < peer;
+//        double me = this.Defuzzification(dest);
+//        double peer = de.Defuzzification(dest);
+        double me = this.buffer.getLast();
+        List<Double> closenessList;
+        if (!closeness.containsKey(otherHost)) {
+            closenessList = new LinkedList<>();
+        } else {
+            closenessList = closeness.get(otherHost);
+        }
+        closenessList.add(me);
+        closeness.put(otherHost, closenessList);
+        double peer = de.buffer.getLast();
+        return me > peer;
     }
-
+    
     private double Defuzzification(DTNHost nodes) {
         double closenessValue = getClosenessOfNodes(nodes);
         double varianceValue = getNormalizedVarianceOfNodes(nodes);
@@ -221,9 +229,25 @@ public class FuzzyBasedRouter implements RoutingDecisionEngine, ClosenessDecisio
 
         return (FuzzyBasedRouter) ((DecisionEngineRouter) otherRouter).getDecisionEngine();
     }
- 
+    
+    private double countAverage(List<Double> list){
+        double count = 0;
+        for (Double value : list) {
+            count += value;
+        }
+        return count / list.size();
+    }
+    
+    @Override
     public void update(DTNHost thisHost){
-        
+        if (SimClock.getTime() - lastRecord >= INTERVAL_TIME) {            
+            if (sampelBuffer.size() == 5) {                
+                buffer.add(countAverage(sampelBuffer));
+                sampelBuffer.removeFirst();
+            }
+            sampelBuffer.add(thisHost.getBufferOccupancy());
+            lastRecord = SimClock.getTime() - SimClock.getTime() % INTERVAL_TIME;
+        }
     }
 
     @Override

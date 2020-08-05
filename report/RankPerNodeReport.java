@@ -45,20 +45,29 @@ public class RankPerNodeReport extends Report {
             NodeRankHelper nr = (NodeRankHelper) de;
 
             Map<String, Integer> nodeList = nr.getNodeRank();
-            String print = "";
             for (Map.Entry<String, Integer> entry : nodeList.entrySet()) {
                 String key = entry.getKey();
                 Integer value = entry.getValue();
-                print += key + "\t" + value + "\n";
+                if (nodeRank.containsKey(key)) {
+                    nodeRank.replace(key, nodeRank.get(key) + value);
+                } else {
+                    nodeRank.put(key, value);
+                }
             }
-            write(print);
 
             List<Integer> nodeSelfish = nr.getNodeSelfish();
             nodeListSelfish = nodeSelfish;
 
         }
+        String print = "";
+        for (Map.Entry<String, Integer> entry : nodeRank.entrySet()) {
+            String key = entry.getKey();
+            Integer value = entry.getValue();
+            print += key + "\t" + value + "\n";
+        }
+        write(print);
         write("Node Selfish : " + nodeListSelfish);
-        
+
         super.done();
     }
 

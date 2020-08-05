@@ -18,13 +18,13 @@ import java.util.Map;
  *
  * @author Afra Rian
  */
-public class TotalContactReportTest extends Report implements ConnectionListener {
+public class TotalContactReport extends Report implements ConnectionListener {
 
     private double lastRecord;
     private int interval = 3600;
     private Map<DTNHost, Integer> listHost;
 
-    public TotalContactReportTest() {
+    public TotalContactReport() {
         super.init();
         lastRecord = 0;
         listHost = new HashMap<>();

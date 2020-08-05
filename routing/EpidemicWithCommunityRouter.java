@@ -212,6 +212,7 @@ public class EpidemicWithCommunityRouter implements RoutingDecisionEngine, NodeR
                         }
                         if (note == true) {
                             nodeRank.put(host1.toString(), !nodeRank.containsKey(host1.toString()) ? 1 : nodeRank.get(host1.toString()) + 1);
+                            msgId.add(m.getId());
                         }
                     } else {
                         break;
