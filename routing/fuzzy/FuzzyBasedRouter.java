@@ -10,7 +10,6 @@ import core.DTNHost;
 import core.Message;
 import core.Settings;
 import core.SimClock;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -19,7 +18,6 @@ import java.util.Map;
 import net.sourceforge.jFuzzyLogic.FIS;
 import net.sourceforge.jFuzzyLogic.FunctionBlock;
 import net.sourceforge.jFuzzyLogic.rule.Variable;
-import report.ClosenessDecisionEngine;
 import routing.MessageRouter;
 import routing.RoutingDecisionEngine;
 import routing.community.Duration;
@@ -29,7 +27,7 @@ import routing.DecisionEngineRouter;
  * 
  * @author Afra Rian Yudianto, Sanata Dharma University
  */
-public class FuzzyBasedRouter implements RoutingDecisionEngine, ClosenessDecisionEngine {
+public class FuzzyBasedRouter implements RoutingDecisionEngine{
 
     public static final String FCL_SIMILARITY = "fclSimilarity";
     public static final String CLOSENESS = "closeness";
@@ -40,7 +38,6 @@ public class FuzzyBasedRouter implements RoutingDecisionEngine, ClosenessDecisio
     private FIS fclSimilarity;
     protected Map<DTNHost, Double> startTimestamps;
     protected Map<DTNHost, List<Duration>> connHistory;
-    protected Map<DTNHost, List<Double>> closeness;
     
     private LinkedList<Double> sampelBuffer;
     private LinkedList<Double> buffer;
@@ -53,9 +50,8 @@ public class FuzzyBasedRouter implements RoutingDecisionEngine, ClosenessDecisio
 
     public FuzzyBasedRouter(FuzzyBasedRouter t) {
         this.fclSimilarity = t.fclSimilarity;
-        startTimestamps = new HashMap<DTNHost, Double>();
-        connHistory = new HashMap<DTNHost, List<Duration>>();
-        closeness = new HashMap<>();
+        startTimestamps = new HashMap<>();
+        connHistory = new HashMap<>();
         buffer = new LinkedList<>();
         sampelBuffer = new LinkedList<>();
         lastRecord = Double.MIN_VALUE;
@@ -123,20 +119,22 @@ public class FuzzyBasedRouter implements RoutingDecisionEngine, ClosenessDecisio
         
         DTNHost dest = m.getTo();
         FuzzyBasedRouter de = getOtherDecisionEngine(otherHost);
-
-//        double me = this.Defuzzification(dest);
-//        double peer = de.Defuzzification(dest);
-        double me = this.buffer.getLast();
-        List<Double> closenessList;
-        if (!closeness.containsKey(otherHost)) {
-            closenessList = new LinkedList<>();
-        } else {
-            closenessList = closeness.get(otherHost);
-        }
-        closenessList.add(me);
-        closeness.put(otherHost, closenessList);
-        double peer = de.buffer.getLast();
+        double me = this.Defuzzification(dest);
+        double peer = de.Defuzzification(dest);
         return me > peer;
+    }
+     public double getNormalizedVarianceBufferOfNodes(List<Double> listBuffer) {
+        double k = listBuffer.size();
+        double N = 0;
+        double sigmf = 0;
+        Iterator<Double> iterator = listBuffer.iterator();
+        while (iterator.hasNext()) {
+            Double buffer = iterator.next();
+            N += buffer;
+            sigmf += Math.pow(buffer, 2);
+        }
+        double hasil = (k * (Math.pow(N, 2) - sigmf)) / (Math.pow(N, 2) * (k - 1));
+        return hasil;
     }
     
     private double Defuzzification(DTNHost nodes) {
@@ -229,30 +227,9 @@ public class FuzzyBasedRouter implements RoutingDecisionEngine, ClosenessDecisio
 
         return (FuzzyBasedRouter) ((DecisionEngineRouter) otherRouter).getDecisionEngine();
     }
-    
-    private double countAverage(List<Double> list){
-        double count = 0;
-        for (Double value : list) {
-            count += value;
-        }
-        return count / list.size();
-    }
-    
+     
     @Override
     public void update(DTNHost thisHost){
-        if (SimClock.getTime() - lastRecord >= INTERVAL_TIME) {            
-            if (sampelBuffer.size() == 5) {                
-                buffer.add(countAverage(sampelBuffer));
-                sampelBuffer.removeFirst();
-            }
-            sampelBuffer.add(thisHost.getBufferOccupancy());
-            lastRecord = SimClock.getTime() - SimClock.getTime() % INTERVAL_TIME;
-        }
-    }
-
-    @Override
-    public Map<DTNHost, List<Double>> getCloseness() {
-        return this.closeness;
-    }
+    }    
 
 }

@@ -51,6 +51,7 @@ public class BubbleRap implements RoutingDecisionEngine, CommunityDetectionEngin
     public void connectionUp(DTNHost thisHost, DTNHost peer) {
     }
 
+    @Override
     public void doExchangeForNewConnection(Connection con, DTNHost peer) {
         DTNHost myHost = con.getOtherNode(peer);
         BubbleRap de = this.getOtherDecisionEngine(peer);
@@ -61,6 +62,7 @@ public class BubbleRap implements RoutingDecisionEngine, CommunityDetectionEngin
         this.community.newConnection(myHost, peer, de.community);	//added	
     }
 
+    @Override
     public void connectionDown(DTNHost thisHost, DTNHost peer) {
 //        double time = startTimestamps.get(peer);
         double time = cek(thisHost, peer);
@@ -93,20 +95,24 @@ public class BubbleRap implements RoutingDecisionEngine, CommunityDetectionEngin
             return 0;
         }
 
+    @Override
     public boolean newMessage(Message m) {
         return true;
     }
 
+    @Override
     public boolean isFinalDest(Message m, DTNHost aHost) {
         return m.getTo() == aHost;
 
     }
 
+    @Override
     public boolean shouldSaveReceivedMessage(Message m, DTNHost thisHost) {
         return m.getTo() != thisHost;
     }
 
-    public boolean shouldSendMessageToHost(Message m, DTNHost otherHost) {
+    @Override
+    public boolean shouldSendMessageToHost(Message m, DTNHost otherHost, DTNHost thisHost) {
         if (m.getTo() == otherHost) {
             return true; // deliver to final destination
         }
@@ -138,6 +144,7 @@ public class BubbleRap implements RoutingDecisionEngine, CommunityDetectionEngin
         return false;
     }
 
+    @Override
     public boolean shouldDeleteSentMessage(Message m, DTNHost otherHost) {
         // delete the message once it is forwarded to the node in the dest'community
 
@@ -146,6 +153,7 @@ public class BubbleRap implements RoutingDecisionEngine, CommunityDetectionEngin
                 && !this.commumesWithHost(m.getTo());
     }
 
+    @Override
     public boolean shouldDeleteOldMessage(Message m, DTNHost hostReportingOld) {
         //BubbleRap de = this.getOtherDecisionEngine(hostReportingOld);
         //return de.commumesWithHost(m.getTo()) &&
@@ -154,6 +162,7 @@ public class BubbleRap implements RoutingDecisionEngine, CommunityDetectionEngin
         return true;
     }
 
+    @Override
     public RoutingDecisionEngine replicate() {
         return new BubbleRap(this);
     }
@@ -179,13 +188,12 @@ public class BubbleRap implements RoutingDecisionEngine, CommunityDetectionEngin
     }
 
     //for REPORT purpose: CommunityDetectionReport
+    @Override
     public Set<DTNHost> getLocalCommunity() {
         return this.community.getLocalCommunity();
     }
 
     @Override
-    public void update(DTNHost thisHost) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+    public void update(DTNHost thisHost) {}
 
 }

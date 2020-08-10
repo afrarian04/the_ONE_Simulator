@@ -27,9 +27,7 @@ public class ClosenessNodeTiapWaktuReport extends Report {
 
     public ClosenessNodeTiapWaktuReport() {
         super();
-        closenessCount = new HashMap<DTNHost, List<Double>>();
-        encounterData = new HashMap<>();
-        listCloseness = new LinkedList<>();
+  
     }
 
     @Override

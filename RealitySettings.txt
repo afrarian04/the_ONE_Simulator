@@ -1,6 +1,7 @@
 
 ## Scenario settings
-Scenario.name = Reality-Buffer
+#Scenario.name = Reality-VarianceBuffer
+Scenario.name = Reality-MeanBuffer
 Scenario.simulateConnections = false
 Scenario.updateInterval = 1
 # 43200s == 12h
@@ -98,9 +99,12 @@ Report.nrofReports = 1
 Report.warmup = 1
 # default directory of reports (can be overridden per Report with output setting)
 #Report.reportDir = reports/FuzzyFix/Reality
+#Report.reportDir = reports/FuzzyDataSet/Reality/SimilarityDataSet
+#Report.reportDir = reports/FuzzyDataSet/Reality/VarianceBufferDataSet
 Report.reportDir = reports/FuzzyDataSet/Reality/BufferOccDataSet
 # Report classes to load
 Report.report1 = ClosenessNodeTiapWaktuReport
+#Report.report1 = ResourceNodeTiapWaktuReport
 #Report.report1 = MessageDeliveredPerContactReport
 #Report.report2 = NumberOfHopsPerMsgPerTimeReport
 #Report.report3 = PercentageMessageDeliveredPerContactReport

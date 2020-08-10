@@ -17,4 +17,5 @@ public interface ClosenessDecisionEngine {
 
     public Map<DTNHost, List<Double>> getCloseness();
 
+
 }

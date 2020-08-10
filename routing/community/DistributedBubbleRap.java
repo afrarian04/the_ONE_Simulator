@@ -175,7 +175,7 @@ public class DistributedBubbleRap implements RoutingDecisionEngine, CommunityDet
 		return m.getTo() != thisHost;
 	}
 
-	public boolean shouldSendMessageToHost(Message m, DTNHost otherHost)
+	public boolean shouldSendMessageToHost(Message m, DTNHost otherHost, DTNHost thisHost)
 	{
 		if(m.getTo() == otherHost) return true; // trivial to deliver to final dest
 		
