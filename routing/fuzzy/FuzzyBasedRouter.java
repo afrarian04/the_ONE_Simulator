@@ -123,19 +123,7 @@ public class FuzzyBasedRouter implements RoutingDecisionEngine{
         double peer = de.Defuzzification(dest);
         return me > peer;
     }
-     public double getNormalizedVarianceBufferOfNodes(List<Double> listBuffer) {
-        double k = listBuffer.size();
-        double N = 0;
-        double sigmf = 0;
-        Iterator<Double> iterator = listBuffer.iterator();
-        while (iterator.hasNext()) {
-            Double buffer = iterator.next();
-            N += buffer;
-            sigmf += Math.pow(buffer, 2);
-        }
-        double hasil = (k * (Math.pow(N, 2) - sigmf)) / (Math.pow(N, 2) * (k - 1));
-        return hasil;
-    }
+    
     
     private double Defuzzification(DTNHost nodes) {
         double closenessValue = getClosenessOfNodes(nodes);
