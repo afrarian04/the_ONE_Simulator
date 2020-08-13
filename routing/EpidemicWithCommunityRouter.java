@@ -122,6 +122,7 @@ public class EpidemicWithCommunityRouter implements RoutingDecisionEngine, NodeR
 
     @Override
     public void connectionUp(DTNHost thisHost, DTNHost peer) {
+        
     }
 
     @Override
@@ -193,6 +194,9 @@ public class EpidemicWithCommunityRouter implements RoutingDecisionEngine, NodeR
             if (!msgId.contains(m.getId())) {
                 for (int i = 0; i < m.getHops().size(); i++) {
                     if (i + 1 < m.getHops().size()) {
+                        if (i == 0) {
+                            continue;
+                        }
                         DTNHost host1 = m.getHops().get(i);
                         DTNHost host2 = m.getHops().get(i + 1);
                         boolean note = false;

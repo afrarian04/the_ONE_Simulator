@@ -55,18 +55,20 @@ public class TransmiteRecieveCountReport extends Report implements MessageListen
     
     @Override
     public void done() {
-        super.done(); //To change body of generated methods, choose Tools | Templates.
+        write("Node\tReceive\n");
         for (Map.Entry<DTNHost, Integer> entry : receiveTime.entrySet()) {
             DTNHost key = entry.getKey();
             Integer value = entry.getValue();
             write(key + "\t" + value);
         }
         
+        write("Node\tTransmit\n");
         for (Map.Entry<DTNHost, Integer> entry : transmitTime.entrySet()) {
             DTNHost key = entry.getKey();
             Integer value = entry.getValue();
             write(key + "\t" + value);
         }
+        super.done(); //To change body of generated methods, choose Tools | Templates.
     }
     
 }
