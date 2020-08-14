@@ -51,6 +51,12 @@ public abstract class MessageRouter {
     public static final String SEND_QUEUE_MODE_S = "sendQueue";
 
     /**
+     *
+     *
+     */
+    public static final String NODE_RANDOM = "randomNode";
+
+    /**
      * Setting value for random queue mode
      */
     public static final int Q_MODE_RANDOM = 1;
@@ -119,6 +125,10 @@ public abstract class MessageRouter {
      */
     private HashMap<String, Collection<Application>> applications = null;
 
+    private int nodeSelfish;
+
+    protected LinkedList<Integer> nodeList;
+
     /**
      * Constructor. Creates a new message router based on the settings in the
      * given Settings object. Size of the message buffer is read from
@@ -131,6 +141,9 @@ public abstract class MessageRouter {
         this.msgTtl = Message.INFINITE_TTL;
         this.applications = new HashMap<String, Collection<Application>>();
 
+        if (s.contains(NODE_RANDOM)) {
+            this.nodeSelfish = s.getInt(NODE_RANDOM);
+        }
         if (s.contains(B_SIZE_S)) {
             this.bufferSize = s.getInt(B_SIZE_S);
         }
@@ -162,6 +175,14 @@ public abstract class MessageRouter {
         this.deliveredMessages = new HashMap<String, Message>();
         this.mListeners = mListeners;
         this.host = host;
+//        Random rnd = new Random();
+//        for (int i = 0; i < 5; i++) {
+//            if (i > 0 && nodeList.contains(nodeList.get(i - 1))) {
+//                nodeList.add(rnd.nextInt(nodeSelfish));
+//            } else {
+//                return;
+//            }
+//        }
         System.setProperty("java.util.Arrays.useLegacyMergeSort", "true");
     }
 
@@ -174,7 +195,8 @@ public abstract class MessageRouter {
         this.bufferSize = r.bufferSize;
         this.msgTtl = r.msgTtl;
         this.sendQueueMode = r.sendQueueMode;
-
+        this.nodeSelfish = r.nodeSelfish;
+        this.nodeList = r.nodeList;
         this.applications = new HashMap<String, Collection<Application>>();
         for (Collection<Application> apps : r.applications.values()) {
             for (Application app : apps) {

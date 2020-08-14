@@ -62,7 +62,7 @@ public class EpidemicWithCommunityRouter implements RoutingDecisionEngine, NodeR
         this.msgId = new LinkedList<>();
         this.nodeList = proto.nodeList;
         this.numOfRnd = proto.numOfRnd;
-        readSelfishnes();
+//        readSelfishnes();
         readExternalCommunity();
 
     }
@@ -122,7 +122,8 @@ public class EpidemicWithCommunityRouter implements RoutingDecisionEngine, NodeR
 
     @Override
     public void connectionUp(DTNHost thisHost, DTNHost peer) {
-        
+        nodeList = thisHost.getRouter().nodeList;
+        System.out.println(this.nodeList);
     }
 
     @Override
@@ -145,16 +146,15 @@ public class EpidemicWithCommunityRouter implements RoutingDecisionEngine, NodeR
 
     @Override
     public boolean shouldSaveReceivedMessage(Message m, DTNHost thisHost) {
-
         if (nodeList.contains(thisHost.getAddress())) {
             for (LinkedList<String> community : communityGlobal) {
                 if (community.contains(thisHost.toString()) && community.contains(m.getTo().toString())) {
-                    return !thisHost.getRouter().hasMessage(m.getId());
+                    return m.getTo() != thisHost;
                 }
             }
         } else {
             this.analysMsgOnBuffer(thisHost);
-            return !thisHost.getRouter().hasMessage(m.getId());
+            return m.getTo() != thisHost;
         }
         return false;
     }
