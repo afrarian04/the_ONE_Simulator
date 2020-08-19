@@ -33,16 +33,11 @@ public class FuzzyBasedRouter implements RoutingDecisionEngine{
     public static final String CLOSENESS = "closeness";
     public static final String VARIANCE = "variance";
     public static final String TRANSFER_OF_UTILITY = "su";
-    public static final int INTERVAL_TIME = 300;
 
     private FIS fclSimilarity;
     protected Map<DTNHost, Double> startTimestamps;
     protected Map<DTNHost, List<Duration>> connHistory;
-    
-    private LinkedList<Double> sampelBuffer;
-    private LinkedList<Double> buffer;
-    private double lastRecord;
-    
+        
     public FuzzyBasedRouter(Settings s) {
         String fclString = s.getSetting(FCL_SIMILARITY);
         fclSimilarity = FIS.load(fclString);
@@ -52,9 +47,6 @@ public class FuzzyBasedRouter implements RoutingDecisionEngine{
         this.fclSimilarity = t.fclSimilarity;
         startTimestamps = new HashMap<>();
         connHistory = new HashMap<>();
-        buffer = new LinkedList<>();
-        sampelBuffer = new LinkedList<>();
-        lastRecord = Double.MIN_VALUE;
     }
 
     @Override

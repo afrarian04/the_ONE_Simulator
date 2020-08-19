@@ -64,7 +64,6 @@ public class EpidemicWithCommunityRouter implements RoutingDecisionEngine, NodeR
         this.numOfRnd = proto.numOfRnd;
 //        readSelfishnes();
         readExternalCommunity();
-
     }
 
     private void readSelfishnes() {
